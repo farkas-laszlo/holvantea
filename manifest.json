@@ -1,0 +1,16 @@
+{
+  "name": "Hol van tea? – Budapesti teaboltok",
+  "short_name": "Hol van tea?",
+  "description": "Melyik budapesti teabolt van most nyitva.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F4F1EA",
+  "theme_color": "#1F4D3A",
+  "lang": "hu",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-mark.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,15 @@
+# Hol van tea? – mini adatbázis
+# Egy sor = egy üzlet. Mezők | jellel elválasztva:
+#   azonosító | név | cím | Google Place ID (üresen hagyható, az api.php kikeresi és cache-eli) | tartalék nyitvatartás
+# A tartalék nyitvatartás csak akkor számít, ha a Google lekérés nem sikerül (nincs kulcs, hálózati hiba).
+# Formátum: "H-Szo 10:00-21:00; V 10:00-19:00"  – napok: H K Sze Cs P Szo V, tartomány kötőjellel.
+# A # jellel kezdődő sorok és az üres sorok figyelmen kívül maradnak.
+
+
+flying-bird|Flying Bird Tea House|1027 Budapest, Frankel Leó út 6.|ChIJRXR-m2ncQUcRQWzhJEyKkQE
+zz|Zhao Zhou tea shop|Budapest, Lánchíd u. 5, 1013|ChIJIV2gQDzcQUcRYZ4EsGX4OOM
+teaevo|Teavolution Tea Shop|Budapest, Nagyszombat u. 1/C, 1036|ChIJHbQ8jHzcQUcRtNahD02vVV4
+teander|Teander - Speciality Tea shop|Budapest, Pozsonyi út 33, 1137|ChIJKzTcxlvdQUcRxXk-fvsmp0I
+elsopesti|Első Pesti Teaház|Budapest, Kresz Géza u 8, 1132|ChIJDe-YaAzcQUcRkj_qRsTUF_8
+level|Levél Teaház|Budapest, Kresz Géza u 14, 1132 Hungary|ChIJ28ri3ELcQUcRQF9M34hWd-A
+1000|1000Tea|Budapest, Váci u 65, 1056 Hungary|ChIJvT0XdUXcQUcR2yGSGxrXqKY

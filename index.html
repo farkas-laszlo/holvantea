@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hol van tea? – Budapesti teaboltok nyitvatartása</title>
+<meta name="description" content="Melyik budapesti teabolt van most nyitva? Élő nyitvatartás, a leghamarabb nyitó üzletekkel.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='none' stroke='%231F4D3A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='20' cy='8' r='2'/%3E%3Cpath d='M20 10v2M9 17c2-4 20-4 22 0M7 18h26l-3 10a4 4 0 0 1-4 3H14a4 4 0 0 1-4-3zM5 35c3 2 27 2 30 0'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="theme-color" content="#1F4D3A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Hol van tea?">
+<style>
+  :root {
+    --paper: #F4F1EA;
+    --card: #FBFAF6;
+    --ink: #2E3338;
+    --green: #1F4D3A;
+    --blue: #1E3A5F;
+    --grey: #3A3F44;
+    --line: rgba(46, 51, 56, 0.12);
+    --amber: #8a5a1f;
+    --serif: 'Shippori Mincho', Georgia, 'Times New Roman', serif;
+    --sans: 'Zen Kaku Gothic New', 'Helvetica Neue', Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background-color: var(--paper);
+    background-image: radial-gradient(rgba(46,51,56,0.045) 0.8px, transparent 0.8px);
+    background-size: 22px 22px;
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  a { color: var(--green); text-decoration: none; }
+  a:hover { color: var(--blue); }
+
+  /* ---------- fejléc ---------- */
+  .header {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .brand svg { width: 32px; height: 32px; flex-shrink: 0; }
+  .brand h1 { margin: 0; font-family: var(--serif); font-size: 22px; font-weight: 600; color: var(--green); letter-spacing: 0.02em; line-height: 1.1; }
+  .brand .tagline { display: none; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--grey); margin-top: 3px; }
+  .header-right { display: flex; align-items: center; gap: 20px; }
+  .clock { display: none; font-size: 14px; color: var(--grey); white-space: nowrap; }
+  .lang { display: flex; border: 1px solid var(--blue); border-radius: 999px; overflow: hidden; }
+  .lang button {
+    appearance: none; border: 0; background: transparent; cursor: pointer;
+    font: inherit; font-size: 11px; letter-spacing: 0.12em; font-weight: 500; color: var(--blue);
+    padding: 8px 12px; min-height: 34px;
+  }
+  .lang button[aria-pressed="true"] { background: var(--blue); color: var(--paper); }
+
+  /* ---------- tartalom ---------- */
+  .main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0 0 40px; }
+
+  .summary { display: flex; align-items: center; gap: 16px; padding: 24px 20px 20px; }
+  .summary .badge { width: 64px; height: 64px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--green); transition: background .3s; }
+  .summary .badge svg { width: 40px; height: 40px; }
+  .summary h2 { margin: 0; font-family: var(--serif); font-size: 22px; font-weight: 500; line-height: 1.2; color: var(--green); text-wrap: pretty; }
+  .summary p { margin: 4px 0 0; font-size: 13px; color: var(--grey); }
+  .summary[data-state="soon"] .badge { background: var(--blue); }
+  .summary[data-state="soon"] h2 { color: var(--blue); }
+  .summary[data-state="later"] .badge { background: var(--grey); }
+  .summary[data-state="later"] h2 { color: var(--grey); }
+
+  .rule { display: none; width: 48px; height: 1px; background: var(--green); }
+
+  /* ---------- odajutás gomb ---------- */
+  .locate { padding: 0 20px 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+  .locate-btn {
+    appearance: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+    font: inherit; font-size: 13px; font-weight: 500; color: var(--blue);
+    background: transparent; border: 1px solid var(--blue); border-radius: 4px;
+    padding: 10px 16px; min-height: 40px;
+  }
+  .locate-btn:hover { background: rgba(30,58,95,0.06); }
+  .locate-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .locate-btn[disabled] { opacity: 0.6; cursor: default; }
+  .locate-note { font-size: 12px; color: var(--grey); }
+  .locate-note.warn { color: var(--amber); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; padding: 0 20px 20px; font-size: 12px; color: var(--grey); }
+  .legend .item { display: flex; align-items: center; gap: 6px; }
+  .legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .legend .icon { display: none; }
+  .legend h3 { display: none; }
+
+  .list { display: flex; flex-direction: column; gap: 10px; padding: 0 16px; list-style: none; margin: 0; }
+  .card {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px; min-height: 72px;
+    background: transparent; border: 1px solid rgba(58,63,68,0.3); border-radius: 4px;
+    color: inherit; text-decoration: none;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .card:hover { color: inherit; transform: translateY(-1px); box-shadow: 0 6px 18px -10px rgba(46,51,56,0.4); }
+  .card:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .card .status-icon { width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .card .status-icon svg { width: 22px; height: 22px; }
+  .card .body { display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0; }
+  .card .name { font-family: var(--serif); font-size: 17px; font-weight: 600; line-height: 1.25; }
+  .card .addr { font-size: 12px; color: var(--grey); }
+  .card .status { font-size: 13px; font-weight: 700; }
+  .card .hours { font-size: 12px; color: var(--grey); }
+  .card .side { display: none; }
+  .card .chev { flex-shrink: 0; width: 18px; height: 18px; color: var(--grey); }
+
+  .card[data-state="open"]  { background: var(--card); border-color: rgba(31,77,58,0.35); }
+  .card[data-state="open"]  .status-icon { background: var(--green); }
+  .card[data-state="open"]  .name, .card[data-state="open"] .status { color: var(--green); }
+  .card[data-state="soon"]  { border-color: rgba(30,58,95,0.35); }
+  .card[data-state="soon"]  .status-icon { background: var(--blue); }
+  .card[data-state="soon"]  .name, .card[data-state="soon"] .status { color: var(--blue); }
+  .card[data-state="later"] { opacity: 0.85; }
+  .card[data-state="later"] .status-icon { background: var(--grey); }
+  .card[data-state="later"] .name, .card[data-state="later"] .status { color: var(--grey); }
+  .card[data-state="unknown"] .status-icon { background: #9aa0a6; }
+  .card[data-closing-soon="true"] { border-left-width: 3px; border-left-color: var(--amber); }
+  .card[data-closing-soon="true"] .hours, .card[data-closing-soon="true"] .side .hours { color: var(--amber); font-weight: 700; }
+
+  /* ---------- kontakt sor (weboldal / telefon / megosztás) ---------- */
+  .contacts { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 2px; }
+  .contacts a, .contacts button {
+    appearance: none; border: 0; background: transparent; cursor: pointer; font: inherit;
+    display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--grey);
+    padding: 2px 0; text-decoration: none;
+  }
+  .contacts a:hover, .contacts button:hover { color: var(--blue); }
+  .contacts svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+  /* ---------- odajutási idő sor kártyánként ---------- */
+  .travel { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; }
+  .travel .mode { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--grey); }
+  .travel .mode svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--ink); }
+  .travel .mode.loading { opacity: 0.5; }
+
+  .foot { padding: 20px 20px 0; font-size: 11px; color: var(--grey); letter-spacing: 0.04em; text-align: center; }
+  .foot .warn { color: #8a3b2a; }
+  .skeleton .card { opacity: 0.5; }
+  .empty { padding: 24px 20px; text-align: center; color: var(--grey); }
+
+  /* ---------- desktop ---------- */
+  @media (min-width: 900px) {
+    .header { padding: 28px 96px 24px; }
+    .brand svg { width: 40px; height: 40px; }
+    .brand h1 { font-size: 26px; }
+    .brand .tagline { display: block; }
+    .clock { display: block; }
+    .lang button { font-size: 12px; padding: 8px 16px; }
+
+    .main {
+      grid-template-columns: 420px minmax(0, 1fr);
+      gap: 0 72px; padding: 56px 96px 64px;
+      grid-template-areas: "summary list" "rule list" "legend list" "locate list" "foot list";
+      align-content: start;
+    }
+    .summary { grid-area: summary; flex-direction: column; align-items: flex-start; gap: 20px; padding: 0; }
+    .summary .badge { width: 120px; height: 120px; }
+    .summary .badge svg { width: 72px; height: 72px; }
+    .summary h2 { font-size: 40px; line-height: 1.15; }
+    .summary p { font-size: 16px; line-height: 1.6; margin-top: 0; }
+    .rule { display: block; grid-area: rule; margin-top: 40px; }
+    .legend { grid-area: legend; flex-direction: column; gap: 14px; padding: 32px 0 0; font-size: 15px; color: var(--ink); }
+    .legend h3 { display: block; margin: 0 0 4px; font-size: 12px; font-weight: 400; letter-spacing: 0.18em; text-transform: uppercase; color: var(--grey); }
+    .legend .item { gap: 14px; }
+    .legend .dot { display: none; }
+    .legend .icon { display: flex; width: 32px; height: 32px; border-radius: 50%; align-items: center; justify-content: center; }
+    .legend .icon svg { width: 18px; height: 18px; }
+    .locate { grid-area: locate; padding: 8px 0 0; }
+    .list { grid-area: list; gap: 14px; padding: 0; }
+    .card { gap: 20px; padding: 22px 28px; }
+    .card .status-icon { width: 44px; height: 44px; }
+    .card .status-icon svg { width: 24px; height: 24px; }
+    .card .name { font-size: 20px; }
+    .card .addr { font-size: 14px; }
+    .card .body .status, .card .body .hours { display: none; }
+    .card .side { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; text-align: right; }
+    .card .side .status { font-size: 14px; }
+    .card .side .hours { font-size: 13px; }
+    .card .chev { width: 20px; height: 20px; }
+    .foot { grid-area: foot; text-align: left; padding: 24px 0 0; font-size: 12px; }
+  }
+  @media (min-width: 900px) and (max-width: 1180px) {
+    .header { padding-left: 48px; padding-right: 48px; }
+    .main { grid-template-columns: 320px minmax(0, 1fr); gap: 0 48px; padding-left: 48px; padding-right: 48px; }
+    .summary h2 { font-size: 32px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+</style>
+</head>
+<body>
+
+<!-- SVG ikonkészlet -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-gaiwan" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="20" cy="8" r="2"/><path d="M20 10v2"/><path d="M9 17c2-4 20-4 22 0"/><path d="M7 18h26l-3 10a4 4 0 0 1-4 3H14a4 4 0 0 1-4-3z"/><path d="M5 35c3 2 27 2 30 0"/>
+  </symbol>
+  <symbol id="i-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
+    <circle cx="12" cy="12" r="9.5"/><path d="M8.5 14.5c1 1.4 2.2 2 3.5 2s2.5-.6 3.5-2"/><circle cx="9" cy="9.5" r="0.7" fill="currentColor"/><circle cx="15" cy="9.5" r="0.7" fill="currentColor"/>
+  </symbol>
+  <symbol id="i-soon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
+    <circle cx="12" cy="12" r="9.5"/><path d="M12 7v5l3 2"/>
+  </symbol>
+  <symbol id="i-later" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19 14.5A8 8 0 0 1 9.5 5a8 8 0 1 0 9.5 9.5z"/>
+  </symbol>
+  <symbol id="i-unknown" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
+    <circle cx="12" cy="12" r="9.5"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7"/><circle cx="12" cy="17" r="0.6" fill="currentColor"/>
+  </symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 6l6 6-6 6"/>
+  </symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 21s7-7.6 7-12.2A7 7 0 1 0 5 8.8C5 13.4 12 21 12 21z"/><circle cx="12" cy="8.8" r="2.4"/>
+  </symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 16.4v2.7a1.8 1.8 0 0 1-2 1.8 17.6 17.6 0 0 1-7.6-2.7 17.3 17.3 0 0 1-5.3-5.3A17.6 17.6 0 0 1 3.4 5.3 1.8 1.8 0 0 1 5.1 3.3h2.7a1.8 1.8 0 0 1 1.8 1.5c.1.85.32 1.68.62 2.47a1.8 1.8 0 0 1-.4 1.9l-1.1 1.1a14 14 0 0 0 5.3 5.3l1.1-1.1a1.8 1.8 0 0 1 1.9-.4c.79.3 1.62.52 2.47.62a1.8 1.8 0 0 1 1.5 1.85z"/>
+  </symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9.2"/><path d="M2.8 12h18.4"/><ellipse cx="12" cy="12" rx="4" ry="9.2"/>
+  </symbol>
+  <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="18" cy="5.2" r="2.2"/><circle cx="6" cy="12" r="2.2"/><circle cx="18" cy="18.8" r="2.2"/>
+    <path d="M8 10.8l8-4.6M8 13.2l8 4.6"/>
+  </symbol>
+  <symbol id="i-car" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 16.2v-4.6l1.8-4.4h10.4l1.8 4.4v4.6"/><path d="M3.2 16.2h17.6"/>
+    <circle cx="7.4" cy="16.6" r="1.5"/><circle cx="16.6" cy="16.6" r="1.5"/>
+  </symbol>
+  <symbol id="i-transit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4.5" y="3.8" width="15" height="12.4" rx="2.2"/><path d="M4.5 11.6h15"/>
+    <path d="M7.3 7.5h2M14.7 7.5h2"/><circle cx="8" cy="19.4" r="1.3"/><circle cx="16" cy="19.4" r="1.3"/>
+    <path d="M6.5 19.4h-1M18.5 19.4h1"/>
+  </symbol>
+  <symbol id="i-bike" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="5.8" cy="17.2" r="3"/><circle cx="18.2" cy="17.2" r="3"/>
+    <path d="M5.8 17.2l3.7-8h3.7l2.7 8"/><path d="M9.5 9.2h3.4"/><path d="M13.2 9.2l3 4.2"/>
+  </symbol>
+  <symbol id="i-walk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="13.2" cy="4.4" r="1.7"/><path d="M13.2 6.6l-3 2.6-2.7 2.2"/><path d="M13.2 6.6l2.6 2.7-0.8 4.6"/>
+    <path d="M11.6 10.7l-1.7 2.6-1.7 5.2"/><path d="M13 10.4l2.6 1.7-0.7 5.4"/>
+  </symbol>
+</svg>
+
+<header class="header">
+  <div class="brand">
+    <svg style="color: var(--green)"><use href="#i-gaiwan"/></svg>
+    <div>
+      <h1 data-i18n="title">Hol van tea?</h1>
+      <div class="tagline" data-i18n="tagline">Budapesti teaboltok nyitvatartása</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="clock" id="clock"></div>
+    <div class="lang" role="group" aria-label="Nyelv / Language">
+      <button type="button" data-lang="hu" aria-pressed="true">HU</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+  <section class="summary" id="summary" data-state="open" aria-live="polite">
+    <div class="badge"><svg style="color: var(--paper)" id="summary-icon"><use href="#i-open"/></svg></div>
+    <div>
+      <h2 id="summary-title">…</h2>
+      <p id="summary-text"></p>
+    </div>
+  </section>
+
+  <div class="rule" aria-hidden="true"></div>
+
+  <section class="legend" aria-label="Jelmagyarázat">
+    <h3 data-i18n="legend">Jelmagyarázat</h3>
+    <div class="item"><span class="dot" style="background: var(--green)"></span><span class="icon" style="background: var(--green)"><svg style="color: var(--paper)"><use href="#i-open"/></svg></span><span data-i18n="legendOpen">Nyitva</span></div>
+    <div class="item"><span class="dot" style="background: var(--blue)"></span><span class="icon" style="background: var(--blue)"><svg style="color: var(--paper)"><use href="#i-soon"/></svg></span><span data-i18n="legendSoon">Hamarosan nyit – 1 órán belül</span></div>
+    <div class="item"><span class="dot" style="background: var(--grey)"></span><span class="icon" style="background: var(--grey)"><svg style="color: var(--paper)"><use href="#i-later"/></svg></span><span data-i18n="legendLater">Zárva – 1 órán túl nyit</span></div>
+  </section>
+
+  <section class="locate" id="locate">
+    <button type="button" class="locate-btn" id="locate-btn"><svg><use href="#i-pin"/></svg><span data-i18n="locateCta">Mutasd, mennyi idő ideérni</span></button>
+    <div class="locate-note" id="locate-note" hidden></div>
+  </section>
+
+  <ul class="list" id="list"></ul>
+
+  <footer class="foot" id="foot"></footer>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var TZ = 'Europe/Budapest';
+  var API_URL = 'api.php';
+  var WEEK = 7 * 1440;
+
+  var I18N = {
+    hu: {
+      title: 'Hol van tea?', tagline: 'Budapesti teaboltok nyitvatartása', legend: 'Jelmagyarázat',
+      legendOpen: 'Nyitva', legendSoon: 'Hamarosan nyit – 1 órán belül', legendLater: 'Zárva – 1 órán túl nyit',
+      sumOpen: 'Most van nyitva teabolt.', sumSoon: 'Hamarosan nyit egy teabolt.', sumLater: 'Most minden teabolt zárva.', sumNone: 'Nincs elérhető adat.',
+      countOpen: function (n) { return n + ' üzlet nyitva'; }, countSoon: function (n) { return n + ' hamarosan nyit'; },
+      dataNote: 'Az adatok a Google nyitvatartásából frissülnek.',
+      open: 'Nyitva', closesAt: function (t) { return 'zár ' + t + '-kor'; }, closesTomorrow: function (t) { return 'zár holnap ' + t + '-kor'; },
+      closesSoonHours: function (m) { return m + ' perc múlva zár!'; },
+      opensIn: function (m) { return 'Nyit ' + m + ' perc múlva'; }, closed: 'Zárva',
+      opensToday: function (t) { return 'nyit ma ' + t + '-kor'; }, opensTomorrow: function (t) { return 'nyit holnap ' + t + '-kor'; },
+      opensOn: function (d, t) { return 'nyit ' + d + ' ' + t + '-kor'; }, always: 'Éjjel-nappal nyitva', unknown: 'Nincs adat',
+      days: ['vasárnap', 'hétfőn', 'kedden', 'szerdán', 'csütörtökön', 'pénteken', 'szombaton'],
+      dayNames: ['Vasárnap', 'Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat'],
+      updated: 'Frissítve', source: 'Google Places', fallback: 'tartalék nyitvatartás (Google nem elérhető)',
+      loading: 'Betöltés…', error: 'Nem sikerült betölteni az adatokat.', openMap: 'Megnyitás a Google Térképen',
+      website: 'Weboldal', call: 'Hívás', share: 'Megosztás', shareCopied: 'Másolva!', shareTitle: 'Megosztás a boltról',
+      locateCta: 'Mutasd, mennyi idő ideérni', locateLoading: 'Számítás…', locateRefresh: 'Frissítés',
+      locateDenied: 'A böngésző nem engedélyezte a helymeghatározást.', locateError: 'Nem sikerült lekérni az utazási időt.',
+      locateUnavailable: 'A böngésződ nem támogatja a helymeghatározást.', locateNote: 'Autónál valós idejű forgalom szerint.',
+      modeDrive: 'Autóval (forgalommal)', modeTransit: 'Tömegközlekedéssel', modeBicycle: 'Biciklivel', modeWalk: 'Gyalog',
+      minutesShort: 'p'
+    },
+    en: {
+      title: 'Where’s tea?', tagline: 'Opening hours of Budapest tea shops', legend: 'Legend',
+      legendOpen: 'Open', legendSoon: 'Opens soon – within 1 hour', legendLater: 'Closed – opens in over 1 hour',
+      sumOpen: 'A tea shop is open right now.', sumSoon: 'A tea shop opens soon.', sumLater: 'All tea shops are closed right now.', sumNone: 'No data available.',
+      countOpen: function (n) { return n + ' open'; }, countSoon: function (n) { return n + ' opening soon'; },
+      dataNote: 'Hours are refreshed from Google.',
+      open: 'Open', closesAt: function (t) { return 'closes at ' + t; }, closesTomorrow: function (t) { return 'closes tomorrow at ' + t; },
+      closesSoonHours: function (m) { return 'Closes in ' + m + ' min!'; },
+      opensIn: function (m) { return 'Opens in ' + m + ' min'; }, closed: 'Closed',
+      opensToday: function (t) { return 'opens today at ' + t; }, opensTomorrow: function (t) { return 'opens tomorrow at ' + t; },
+      opensOn: function (d, t) { return 'opens ' + d + ' at ' + t; }, always: 'Open 24 hours', unknown: 'No data',
+      days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+      dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+      updated: 'Updated', source: 'Google Places', fallback: 'fallback hours (Google unavailable)',
+      loading: 'Loading…', error: 'Could not load data.', openMap: 'Open in Google Maps',
+      website: 'Website', call: 'Call', share: 'Share', shareCopied: 'Copied!', shareTitle: 'Share this shop',
+      locateCta: 'Show travel time to each shop', locateLoading: 'Calculating…', locateRefresh: 'Refresh',
+      locateDenied: 'Location access was denied.', locateError: 'Could not fetch travel times.',
+      locateUnavailable: 'Your browser does not support geolocation.', locateNote: 'Driving time reflects real-time traffic.',
+      modeDrive: 'By car (with traffic)', modeTransit: 'By public transport', modeBicycle: 'By bike', modeWalk: 'On foot',
+      minutesShort: 'min'
+    }
+  };
+
+  var lang = (function () {
+    var q = new URLSearchParams(location.search).get('lang');
+    if (q === 'en' || q === 'hu') return q;
+    try { var s = localStorage.getItem('hvt-lang'); if (s === 'en' || s === 'hu') return s; } catch (e) {}
+    return 'hu';
+  })();
+  var T = I18N[lang];
+  var data = null;
+  var travelData = null; // { <shopId>: { drive:{minutes}|null, transit:..., bicycle:..., walk:... } }
+
+  // ---- idő Budapest szerint ----
+  function nowInTz() {
+    var parts = new Intl.DateTimeFormat('en-US', { timeZone: TZ, weekday: 'short', hour: 'numeric', minute: 'numeric', hour12: false }).formatToParts(new Date());
+    var map = {}; parts.forEach(function (p) { map[p.type] = p.value; });
+    var day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(map.weekday);
+    var hour = parseInt(map.hour, 10) % 24, minute = parseInt(map.minute, 10);
+    return { day: day, hour: hour, minute: minute, week: day * 1440 + hour * 60 + minute };
+  }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function hm(t) { return pad(t.hour) + ':' + pad(t.minute); }
+  function toWeek(t) { return t.day * 1440 + t.hour * 60 + t.minute; }
+
+  // ---- állapot számítás ----
+  // Visszaad: { state: 'open'|'soon'|'later'|'unknown', minutesToOpen, minutesToClose, openAt, closeAt }
+  function computeStatus(periods, now) {
+    if (!periods || !periods.length) return { state: 'unknown', sort: 1e9 };
+    if (periods[0].allWeek) return { state: 'open', always: true, minutesToClose: 1e9, sort: -1e9 };
+
+    var best = null, nextOpen = null;
+    periods.forEach(function (p) {
+      var o = toWeek(p.open), c = toWeek(p.close);
+      if (c <= o) c += WEEK;                       // éjfél / hét átfordulás
+      for (var shift = -WEEK; shift <= WEEK; shift += WEEK) {
+        var os = o + shift, cs = c + shift;
+        if (os <= now.week && now.week < cs) {
+          var mtc = cs - now.week;
+          if (!best || mtc > best.minutesToClose) best = { minutesToClose: mtc, closeAt: p.close };
+        }
+        if (os > now.week) {
+          var mto = os - now.week;
+          if (!nextOpen || mto < nextOpen.minutesToOpen) nextOpen = { minutesToOpen: mto, openAt: p.open, closeAt: p.close };
+        }
+      }
+    });
+    if (best) return { state: 'open', minutesToClose: best.minutesToClose, closeAt: best.closeAt, closingSoon: best.minutesToClose <= 30, sort: -best.minutesToClose };
+    if (nextOpen) return { state: nextOpen.minutesToOpen <= 60 ? 'soon' : 'later', minutesToOpen: nextOpen.minutesToOpen, openAt: nextOpen.openAt, closeAt: nextOpen.closeAt, sort: nextOpen.minutesToOpen };
+    return { state: 'unknown', sort: 1e9 };
+  }
+
+  function statusLines(st, now) {
+    if (st.state === 'unknown') return [T.unknown, ''];
+    if (st.always) return [T.open, T.always];
+    if (st.state === 'open') {
+      var sameDay = st.closeAt.day === now.day;
+      var hoursLine = sameDay ? T.closesAt(hm(st.closeAt)) : T.closesTomorrow(hm(st.closeAt));
+      if (st.closingSoon) hoursLine = T.closesSoonHours(st.minutesToClose);
+      return [T.open, hoursLine];
+    }
+    var t = hm(st.openAt);
+    var when = st.openAt.day === now.day ? T.opensToday(t) : st.openAt.day === (now.day + 1) % 7 && st.minutesToOpen < 1440 ? T.opensTomorrow(t) : T.opensOn(T.days[st.openAt.day], t);
+    if (st.state === 'soon') return [T.opensIn(st.minutesToOpen), t + ' – ' + hm(st.closeAt)];
+    return [T.closed, when];
+  }
+
+  // ---- renderelés ----
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function icon(id, color) {
+    var s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    s.style.color = color || 'var(--paper)';
+    var u = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+    u.setAttribute('href', '#' + id); s.appendChild(u); return s;
+  }
+
+  function buildContacts(shop) {
+    var wrap = el('div', 'contacts');
+    if (shop.website) {
+      var w = document.createElement('a');
+      w.href = shop.website; w.target = '_blank'; w.rel = 'noopener'; w.title = T.website;
+      w.appendChild(icon('i-globe', 'var(--grey)'));
+      w.appendChild(document.createTextNode(T.website));
+      wrap.appendChild(w);
+    }
+    if (shop.phone) {
+      var p = document.createElement('a');
+      p.href = 'tel:' + shop.phone.replace(/[^0-9+]/g, ''); p.title = T.call;
+      p.appendChild(icon('i-phone', 'var(--grey)'));
+      p.appendChild(document.createTextNode(shop.phone));
+      wrap.appendChild(p);
+    }
+    var s = document.createElement('button');
+    s.type = 'button'; s.title = T.shareTitle;
+    s.appendChild(icon('i-share', 'var(--grey)'));
+    var label = document.createElement('span'); label.textContent = T.share; s.appendChild(label);
+    s.addEventListener('click', function () {
+      var text = shop.name + ' – ' + shop.address + '\n' + shop.mapsUrl;
+      if (navigator.share) {
+        navigator.share({ title: shop.name, text: shop.name, url: shop.mapsUrl }).catch(function () {});
+      } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function () {
+          label.textContent = T.shareCopied;
+          setTimeout(function () { label.textContent = T.share; }, 2000);
+        });
+      }
+    });
+    wrap.appendChild(s);
+    return wrap;
+  }
+
+  var TRAVEL_MODES = [['drive', 'i-car', 'modeDrive'], ['transit', 'i-transit', 'modeTransit'], ['bicycle', 'i-bike', 'modeBicycle'], ['walk', 'i-walk', 'modeWalk']];
+
+  function renderTravel(shopId, modes) {
+    var row = document.querySelector('.travel[data-shop="' + (window.CSS && CSS.escape ? CSS.escape(shopId) : shopId) + '"]');
+    if (!row || !modes) return;
+    row.innerHTML = '';
+    TRAVEL_MODES.forEach(function (m) {
+      var entry = modes[m[0]];
+      if (!entry || entry.minutes == null) return;
+      var span = el('span', 'mode');
+      span.title = T[m[2]];
+      span.appendChild(icon(m[1], 'var(--ink)'));
+      span.appendChild(document.createTextNode(entry.minutes + ' ' + T.minutesShort));
+      row.appendChild(span);
+    });
+    row.hidden = row.children.length === 0;
+  }
+
+  function reapplyTravel() {
+    if (!travelData) return;
+    Object.keys(travelData).forEach(function (id) { renderTravel(id, travelData[id]); });
+  }
+
+  function render() {
+    var list = document.getElementById('list');
+    var summary = document.getElementById('summary');
+    var foot = document.getElementById('foot');
+    list.innerHTML = '';
+    if (!data) { list.appendChild(el('li', 'empty', T.loading)); return; }
+
+    var now = nowInTz();
+    var rows = data.shops.map(function (s) { return { shop: s, st: computeStatus(s.periods, now) }; });
+    rows.sort(function (a, b) { return a.st.sort - b.st.sort || a.shop.name.localeCompare(b.shop.name, lang); });
+
+    var nOpen = 0, nSoon = 0;
+    rows.forEach(function (r) {
+      if (r.st.state === 'open') nOpen++; else if (r.st.state === 'soon') nSoon++;
+      var lines = statusLines(r.st, now);
+      var card = el('div', 'card');
+      card.dataset.state = r.st.state;
+      card.dataset.closingSoon = r.st.closingSoon ? 'true' : 'false';
+      card.setAttribute('role', 'link');
+      card.tabIndex = 0;
+      card.setAttribute('aria-label', r.shop.name + ' – ' + T.openMap);
+      function openMaps() { window.open(r.shop.mapsUrl, '_blank', 'noopener'); }
+      card.addEventListener('click', function (e) { if (!e.target.closest('.contacts')) openMaps(); });
+      card.addEventListener('keydown', function (e) {
+        if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('.contacts')) { e.preventDefault(); openMaps(); }
+      });
+
+      var ic = el('span', 'status-icon'); ic.appendChild(icon('i-' + r.st.state)); card.appendChild(ic);
+      var body = el('div', 'body');
+      body.appendChild(el('div', 'name', r.shop.name));
+      body.appendChild(el('div', 'addr', r.shop.address));
+      body.appendChild(el('div', 'status', lines[0] + (lines[1] ? ' · ' + lines[1] : '')));
+      body.appendChild(buildContacts(r.shop));
+      var travelRow = el('div', 'travel'); travelRow.dataset.shop = r.shop.id; travelRow.hidden = true;
+      body.appendChild(travelRow);
+      card.appendChild(body);
+      var side = el('div', 'side');
+      side.appendChild(el('div', 'status', lines[0]));
+      side.appendChild(el('div', 'hours', lines[1]));
+      card.appendChild(side);
+      var chev = icon('i-chev', 'var(--grey)'); chev.setAttribute('class', 'chev'); card.appendChild(chev);
+      var li = el('li'); li.appendChild(card); list.appendChild(li);
+    });
+
+    reapplyTravel();
+
+    var state = nOpen ? 'open' : nSoon ? 'soon' : rows.length ? 'later' : 'unknown';
+    summary.dataset.state = state;
+    document.getElementById('summary-icon').innerHTML = '<use href="#i-' + state + '"/>';
+    document.getElementById('summary-title').textContent = { open: T.sumOpen, soon: T.sumSoon, later: T.sumLater, unknown: T.sumNone }[state];
+    var bits = [];
+    if (nOpen) bits.push(T.countOpen(nOpen));
+    if (nSoon) bits.push(T.countSoon(nSoon));
+    document.getElementById('summary-text').textContent = (bits.length ? bits.join(', ') + '. ' : '') + T.dataNote;
+
+    var anyGoogle = data.shops.some(function (s) { return s.source === 'google'; });
+    var fetched = new Date(data.generatedAt);
+    var timeStr = new Intl.DateTimeFormat(lang === 'hu' ? 'hu-HU' : 'en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit' }).format(fetched);
+    foot.innerHTML = '';
+    foot.appendChild(document.createTextNode(T.updated + ' ' + timeStr + ' · '));
+    var src = el('span', anyGoogle ? '' : 'warn', anyGoogle ? T.source : T.fallback);
+    foot.appendChild(src);
+  }
+
+  function renderClock() {
+    var now = nowInTz();
+    document.getElementById('clock').textContent = T.dayNames[now.day] + ', ' + pad(now.hour) + ':' + pad(now.minute);
+  }
+
+  function applyLang() {
+    T = I18N[lang];
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(function (n) { n.textContent = T[n.dataset.i18n]; });
+    document.querySelectorAll('.lang button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === lang)); });
+    document.title = T.title + ' – ' + T.tagline;
+    setLocateState(locateState, locateMsgKey);
+    renderClock(); render();
+  }
+
+  // ---- odajutási idő (helymeghatározás + Google Routes) ----
+  var locateBtn = document.getElementById('locate-btn');
+  var locateNote = document.getElementById('locate-note');
+  var locateState = 'idle'; // idle | loading | done | error
+  var locateMsgKey = null;  // I18N kulcs, amit az aktuális jegyzetsorban mutatunk
+
+  function setLocateState(state, msgKey) {
+    locateState = state; locateMsgKey = msgKey || null;
+    var span = locateBtn.querySelector('span');
+    locateBtn.disabled = state === 'loading';
+    span.textContent = state === 'loading' ? T.locateLoading : (state === 'done' ? T.locateRefresh : T.locateCta);
+    if (msgKey) { locateNote.textContent = T[msgKey]; locateNote.hidden = false; locateNote.classList.toggle('warn', state === 'error'); }
+    else { locateNote.hidden = true; }
+  }
+
+  function fetchTravel(lat, lng) {
+    fetch('distance.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lat: lat, lng: lng }) })
+      .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+      .then(function (json) {
+        travelData = json.shops || {};
+        reapplyTravel();
+        setLocateState('done', 'locateNote');
+      })
+      .catch(function () { setLocateState('error', 'locateError'); });
+  }
+
+  function requestLocation() {
+    if (!('geolocation' in navigator)) { setLocateState('error', 'locateUnavailable'); return; }
+    setLocateState('loading');
+    navigator.geolocation.getCurrentPosition(
+      function (pos) { fetchTravel(pos.coords.latitude, pos.coords.longitude); },
+      function (err) { setLocateState('error', err.code === 1 ? 'locateDenied' : 'locateError'); },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 5 * 60 * 1000 }
+    );
+  }
+
+  locateBtn.addEventListener('click', requestLocation);
+
+  document.querySelectorAll('.lang button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      lang = b.dataset.lang;
+      try { localStorage.setItem('hvt-lang', lang); } catch (e) {}
+      applyLang();
+    });
+  });
+
+  function load() {
+    fetch(API_URL + '?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (json) { data = json; render(); })
+      .catch(function () {
+        var list = document.getElementById('list');
+        if (!data) { list.innerHTML = ''; list.appendChild(el('li', 'empty', T.error)); }
+      });
+  }
+
+  applyLang();
+  load();
+  setInterval(function () { renderClock(); if (data) render(); }, 30 * 1000);  // státusz újraszámolás
+  setInterval(load, 15 * 60 * 1000);                                           // adatfrissítés
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+  }
+})();
+</script>
+</body>
+</html>

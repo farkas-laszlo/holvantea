@@ -1,0 +1,34 @@
+# ---------- Secrets & local config ----------
+# config.php holds the live Google API key – commit config.example.php only.
+config.php
+.env
+.env.*
+.htpasswd
+
+# ---------- Runtime cache (Google responses, visitor route lookups) ----------
+cache/*
+!cache/.gitkeep
+
+# ---------- Logs ----------
+*.log
+error_log
+php_errorlog
+
+# ---------- Backups ----------
+*.bak
+*.old
+*.zip
+*.tar.gz
+
+# ---------- cPanel / hosting artifacts ----------
+.well-known/
+cgi-bin/
+.user.ini
+php.ini
+
+# ---------- IDE / OS ----------
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
