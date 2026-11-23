@@ -32,9 +32,13 @@ function loadShops(string $file): array
     return $shops;
 }
 
-/** Egyszerű HTTP kliens (curl, vagy ha nincs, stream context). */
+/** Egyszerű HTTP kliens (curl, vagy ha nincs, stream context). Csak Google-hívásokra használjuk. */
 function httpJson(string $method, string $url, array $headers, ?array $body = null): ?array
 {
+    // Napi biztonsági plafon az összes Google-hívásra: ha elfogyott, nem hívunk, nincs számla.
+    if (!googleCallAllowed()) {
+        return null;
+    }
     $headers[] = 'Content-Type: application/json';
     $payload   = $body === null ? null : json_encode($body, JSON_UNESCAPED_UNICODE);
 
@@ -153,6 +157,107 @@ function pickCacheDir(string $preferred): string
         }
     }
     return $preferred;
+}
+
+// ------------------------------------------------- védelem a túlzott használat ellen
+
+/**
+ * Fájl alapú számláló (pl. napi / havi keret). Lefoglal $n egységet, ha belefér a $limit-be.
+ * $limit <= 0: nincs korlát. Ha a számláló nem írható, a biztonság kedvéért NEM engedi a hívást.
+ */
+function counterTake(string $cacheDir, string $name, int $limit, int $n = 1): bool
+{
+    if ($limit <= 0) {
+        return true;
+    }
+    $fh = @fopen($cacheDir . '/cnt_' . preg_replace('/[^a-z0-9_-]/i', '_', $name) . '.txt', 'c+');
+    if ($fh === false) {
+        error_log("holvantea: a(z) $name számláló nem írható, a hívást biztonsági okból letiltom");
+        return false;
+    }
+    flock($fh, LOCK_EX);
+    $used = (int)stream_get_contents($fh);
+    $ok   = $used + $n <= $limit;
+    if ($ok || $used <= $limit) {
+        // túllépéskor egyszer limit+1-et írunk, így csak egyszer kerül a naplóba
+        $new = $ok ? $used + $n : $limit + 1;
+        ftruncate($fh, 0);
+        rewind($fh);
+        fwrite($fh, (string)$new);
+        fflush($fh);
+        if (!$ok) {
+            error_log("holvantea: elfogyott a(z) $name keret ($limit)");
+        }
+    }
+    flock($fh, LOCK_UN);
+    fclose($fh);
+    return $ok;
+}
+
+/** A végpontok induláskor megadják a cache mappát és a napi Google-plafont. */
+function googleGuardInit(string $cacheDir, array $config): void
+{
+    $GLOBALS['holvantea_google_guard'] = [
+        'dir'   => $cacheDir,
+        'limit' => (int)($config['google_daily_limit'] ?? 300),
+    ];
+}
+
+function googleCallAllowed(): bool
+{
+    $g = $GLOBALS['holvantea_google_guard'] ?? null;
+    if ($g === null) {
+        error_log('holvantea: googleGuardInit() hiányzik, a Google-hívást letiltom');
+        return false;
+    }
+    return counterTake($g['dir'], 'google_' . date('Ymd'), $g['limit']);
+}
+
+/** IP-alapú korlát: legfeljebb $max kérés $window másodpercenként. Az IP-t csak hash-ként tároljuk. */
+function rateLimitOk(string $cacheDir, string $bucket, int $max, int $window): bool
+{
+    if ($max <= 0) {
+        return true;
+    }
+    $ip   = (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+    $file = $cacheDir . '/rl_' . $bucket . '_' . substr(hash('sha256', $ip), 0, 20) . '.json';
+    $now  = time();
+    $fh   = @fopen($file, 'c+');
+    if ($fh === false) {
+        return false;
+    }
+    flock($fh, LOCK_EX);
+    $hits = json_decode((string)stream_get_contents($fh), true);
+    $hits = is_array($hits)
+        ? array_values(array_filter($hits, function ($t) use ($now, $window) { return is_int($t) && $t > $now - $window; }))
+        : [];
+    $ok = count($hits) < $max;
+    if ($ok) {
+        $hits[] = $now;
+    }
+    ftruncate($fh, 0);
+    rewind($fh);
+    fwrite($fh, json_encode($hits));
+    fflush($fh);
+    flock($fh, LOCK_UN);
+    fclose($fh);
+    return $ok;
+}
+
+/** Régi útvonal-cache, IP-korlát és számláló fájlok takarítása (kb. minden 50. kérésnél), hogy egy bot ne töltse tele a tárhelyet. */
+function cacheHousekeeping(string $cacheDir): void
+{
+    if (mt_rand(1, 50) !== 1) {
+        return;
+    }
+    $maxAge = ['route_*.json' => 3600, 'rl_*.json' => 3600, 'cnt_*.txt' => 40 * 86400];
+    foreach ($maxAge as $pattern => $age) {
+        foreach (glob($cacheDir . '/' . $pattern) ?: [] as $f) {
+            if (@filemtime($f) < time() - $age) {
+                @unlink($f);
+            }
+        }
+    }
 }
 
 function loadConfig(): array

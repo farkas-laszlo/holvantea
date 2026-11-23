@@ -44,7 +44,27 @@ Az első betöltéskor az `api.php` név + cím alapján kikeresi az üzletek Go
 
 ### Költség az odajutási időnél
 
-Egy kattintás a „Mutasd, mennyi idő ideérni” gombra 4 Google-hívást indít (autó/tömegközlekedés/bicikli/gyalog egyenként egy hívással, mind az 5 üzletre egyszerre – ún. mátrixhívás). Ez a Routes API ingyenes havi keretének nagyon kis töredéke, hacsak nem lesz több tízezer kattintás havonta. A `distance.php` emellett 3 percre cache-eli az eredményt ugyanarra a kb. 10 méteres pontosságú helyre, hogy egy véletlen dupla kattintás vagy oldal-újratöltés ne kérdezze le kétszer.
+Egy kattintás a „Mutasd, mennyi idő ideérni” gombra 4 Google-hívást indít (autó/tömegközlekedés/bicikli/gyalog egyenként egy hívással, mind az 5 üzletre egyszerre – ún. mátrixhívás). A Route Matrixot a Google elemenként számlázza (indulópont × célpont): 7 üzlettel egy kattintás 28 elem, ebből az autós 7 a drágább, forgalomfigyelős „Pro” kategória.
+
+### Védelem botok és elszálló számla ellen
+
+A `distance.php` több réteggel védi a Google-keretet (a `config.php`-ban állíthatók, ha hiányoznak, az alapértékek érvényesek):
+
+| Védelem | Alapérték |
+|---|---|
+| Csak POST, csak a saját oldalról (Origin fejléc) | – |
+| Csak Budapest és környéke (`travel_area`) | é. sz. 47,2–47,8 · k. h. 18,6–19,6 |
+| Koordináta kerekítése, 3 perces cache ugyanarra a helyre | kb. 100 m |
+| IP-nként új lekérés 10 percenként (`travel_per_ip`) | 10 |
+| Új odajutási lekérés naponta (`travel_daily_limit`) | 30 |
+| Új odajutási lekérés havonta (`travel_monthly_limit`) | 450 – a Routes API ingyenes havi keretén belül |
+| Összes Google-hívás naponta, nyitvatartással együtt (`google_daily_limit`) | 300 |
+
+A cache-ből kiszolgált válasz nem számít bele a keretekbe. Ha egy keret elfogy, az oldal ezt szövegesen jelzi, a nyitvatartás ettől függetlenül működik. A számlálók a `cache/` mappában vannak (`cnt_*.txt`), a régi fájlokat a kód magától takarítja.
+
+**Ajánlott még a Google Cloud Console-ban** (ez a kódtól függetlenül is véd):
+- **APIs & Services → Routes API / Places API (New) → Quotas**: állíts be napi kérésplafont (pl. Routes: 200/nap, Places: 500/nap). Ez kemény korlát, efölött a Google nem szolgál ki.
+- **Billing → Budgets & alerts**: költségkeret-értesítés (pl. 5 USD). Ez csak e-mailt küld, a számlázást nem állítja le.
 
 ## Üzletek szerkesztése
 

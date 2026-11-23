@@ -35,6 +35,7 @@ Auto-refresh 30s / 15m        lib.php  (shared helpers, HTTP client, file cache)
 
 - **The API key never reaches the client.** All Google calls go through a small PHP proxy.
 - **File-based caching** keeps Google API usage (and cost) minimal: Place IDs are resolved once, opening hours are cached for 6 hours, and route lookups for 3 minutes per ~10 m location.
+- **Abuse & cost protection:** the travel-time endpoint is same-origin only, limited to the Budapest area, rate-limited per IP and capped per day/month to stay within Google's free tier, plus a global daily cap on all Google calls.
 - **Hosting-friendly:** no framework, no database server, no build step. It runs on plain cPanel shared hosting and falls back to the system temp dir if the cache folder isn't writable (`open_basedir`).
 - **Flat-file data:** shops are kept in a human-editable `shops.txt` (`id|name|address|placeId|fallback hours`).
 

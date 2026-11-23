@@ -109,6 +109,8 @@ function normalizeGooglePeriods(array $place): array
 
 $key      = trim((string)$config['google_api_key']);
 $cacheDir = pickCacheDir($config['cache_dir']);
+googleGuardInit($cacheDir, $config);
+cacheHousekeeping($cacheDir);
 $ttl      = (int)$config['cache_ttl'];
 $result   = [];
 

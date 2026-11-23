@@ -20,4 +20,21 @@ return [
 
     // Időzóna.
     'timezone' => 'Europe/Budapest',
+
+    // ---- Védelem a túlzott használat (és a Google-számla) ellen ----
+    // Ezek elhagyhatók: ha hiányoznak, az itt látható alapértékek érvényesek. 0 = nincs korlát (nem ajánlott).
+
+    // Odajutási idő: ennyi új Google-lekérés naponta / havonta (egy lekérés = 4 mátrixhívás, üzletenként 4 elem).
+    // 450/hó 7 üzlettel kb. 3150 Pro és 9450 Essentials elem: a Routes API ingyenes havi keretén belül marad.
+    'travel_daily_limit'   => 30,
+    'travel_monthly_limit' => 450,
+
+    // Odajutási idő: egy IP-címről legfeljebb ennyi új lekérés 10 percenként.
+    'travel_per_ip' => 10,
+
+    // Csak innen kérhető odajutási idő (Budapest és környéke).
+    'travel_area' => ['minLat' => 47.20, 'maxLat' => 47.80, 'minLng' => 18.60, 'maxLng' => 19.60],
+
+    // Biztonsági plafon: összesen ennyi Google-hívás naponta (nyitvatartás + odajutás együtt).
+    'google_daily_limit' => 300,
 ];
