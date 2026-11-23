@@ -168,6 +168,8 @@
       grid-template-columns: 420px minmax(0, 1fr);
       gap: 0 72px; padding: 56px 96px 64px;
       grid-template-areas: "summary list" "rule list" "legend list" "locate list" "foot list";
+      /* the last row soaks up the card list's height, so the left column stays compact */
+      grid-template-rows: auto auto auto auto 1fr;
       align-content: start;
     }
     .summary { grid-area: summary; flex-direction: column; align-items: flex-start; gap: 20px; padding: 0; }
@@ -182,7 +184,7 @@
     .legend .dot { display: none; }
     .legend .icon { display: flex; width: 32px; height: 32px; border-radius: 50%; align-items: center; justify-content: center; }
     .legend .icon svg { width: 18px; height: 18px; }
-    .locate { grid-area: locate; padding: 8px 0 0; }
+    .locate { grid-area: locate; padding: 24px 0 0; }
     .list { grid-area: list; gap: 14px; padding: 0; }
     .card { gap: 20px; padding: 22px 28px; }
     .card .status-icon { width: 44px; height: 44px; }
