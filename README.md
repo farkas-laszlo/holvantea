@@ -4,6 +4,12 @@
 
 A small, mobile-first web app that shows which Budapest tea shops are open **right now**, sorted by opening status, with live opening hours from Google, contact details and travel time from the visitor's location.
 
+<p align="center">
+  <img src="docs/screenshots/desktop.png" alt="Hol van tea? – desktop view" width="68%">
+  &nbsp;
+  <img src="docs/screenshots/mobile.png" alt="Hol van tea? – mobile view" width="24%">
+</p>
+
 ---
 
 ## ✨ Features
