@@ -53,7 +53,6 @@ A `distance.php` több réteggel védi a Google-keretet (a `config.php`-ban áll
 | Védelem | Alapérték |
 |---|---|
 | Csak POST, csak a saját oldalról (Origin fejléc) | – |
-| Csak Budapest és környéke (`travel_area`) | é. sz. 47,2–47,8 · k. h. 18,6–19,6 |
 | Koordináta kerekítése, 3 perces cache ugyanarra a helyre | kb. 100 m |
 | IP-nként új lekérés 10 percenként (`travel_per_ip`) | 10 |
 | Új odajutási lekérés naponta (`travel_daily_limit`) | 30 |

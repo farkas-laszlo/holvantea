@@ -15,7 +15,7 @@
  *
  * Védelem a túlzott használat (és a Google-számla) ellen:
  *  - csak POST, és csak a saját oldalról (Origin fejléc),
- *  - csak Budapest és környéke (travel_area), a koordináta kb. 100 m-re kerekítve,
+ *  - a koordináta kb. 100 m-re kerekítve (kevesebb egyedi lekérés, jobb cache-találat),
  *  - IP-nként legfeljebb travel_per_ip lekérés 10 percenként,
  *  - napi (travel_daily_limit) és havi (travel_monthly_limit) plafon a Google-lekérésekre,
  *  - plusz a lib.php napi biztonsági plafonja minden Google-hívásra (google_daily_limit).
@@ -69,12 +69,8 @@ if (!is_array($in) || !isset($in['lat'], $in['lng'])) {
 // kb. 100 m-re kerekítve: az odajutási időn ez nem látszik, de sokkal kevesebb egyedi lekérés lehet
 $lat = round((float)$in['lat'], 3);
 $lng = round((float)$in['lng'], 3);
-if (!is_finite($lat) || !is_finite($lng)) {
+if (!is_finite($lat) || !is_finite($lng) || $lat < -90 || $lat > 90 || $lng < -180 || $lng > 180 || ($lat === 0.0 && $lng === 0.0)) {
     badRequest('invalid lat/lng');
-}
-$area = $config['travel_area'] ?? ['minLat' => 47.20, 'maxLat' => 47.80, 'minLng' => 18.60, 'maxLng' => 19.60];
-if ($lat < $area['minLat'] || $lat > $area['maxLat'] || $lng < $area['minLng'] || $lng > $area['maxLng']) {
-    fail(422, 'out_of_area');
 }
 
 $cacheDir = pickCacheDir($config['cache_dir']);

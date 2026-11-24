@@ -32,9 +32,6 @@ return [
     // Odajutási idő: egy IP-címről legfeljebb ennyi új lekérés 10 percenként.
     'travel_per_ip' => 10,
 
-    // Csak innen kérhető odajutási idő (Budapest és környéke).
-    'travel_area' => ['minLat' => 47.20, 'maxLat' => 47.80, 'minLng' => 18.60, 'maxLng' => 19.60],
-
     // Biztonsági plafon: összesen ennyi Google-hívás naponta (nyitvatartás + odajutás együtt).
     'google_daily_limit' => 300,
 ];

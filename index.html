@@ -339,7 +339,7 @@
       loading: 'Betöltés…', error: 'Nem sikerült betölteni az adatokat.', openMap: 'Megnyitás a Google Térképen',
       website: 'Weboldal', call: 'Hívás', share: 'Megosztás', shareCopied: 'Másolva!', shareTitle: 'Megosztás a boltról',
       locateCta: 'Mutasd, mennyi idő ideérni', locateLoading: 'Számítás…', locateRefresh: 'Frissítés',
-      locateDenied: 'A böngésző nem engedélyezte a helymeghatározást.', locateError: 'Nem sikerült lekérni az utazási időt.', locateBusy: 'Túl sok lekérés – próbáld újra pár perc múlva.', locateLimit: 'Az odajutási idő ma már nem kérhető le, próbáld holnap.', locateArea: 'Az odajutási idő csak Budapesten és környékén érhető el.',
+      locateDenied: 'A böngésző nem engedélyezte a helymeghatározást.', locateError: 'Nem sikerült lekérni az utazási időt.', locateBusy: 'Túl sok lekérés – próbáld újra pár perc múlva.', locateLimit: 'Az odajutási idő ma már nem kérhető le, próbáld holnap.',
       locateUnavailable: 'A böngésződ nem támogatja a helymeghatározást.', locateNote: 'Autónál valós idejű forgalom szerint.',
       modeDrive: 'Autóval (forgalommal)', modeTransit: 'Tömegközlekedéssel', modeBicycle: 'Biciklivel', modeWalk: 'Gyalog',
       minutesShort: 'p'
@@ -361,7 +361,7 @@
       loading: 'Loading…', error: 'Could not load data.', openMap: 'Open in Google Maps',
       website: 'Website', call: 'Call', share: 'Share', shareCopied: 'Copied!', shareTitle: 'Share this shop',
       locateCta: 'Show travel time to each shop', locateLoading: 'Calculating…', locateRefresh: 'Refresh',
-      locateDenied: 'Location access was denied.', locateError: 'Could not fetch travel times.', locateBusy: 'Too many requests – please try again in a few minutes.', locateLimit: 'Travel times are unavailable for today, please try again tomorrow.', locateArea: 'Travel times are only available in and around Budapest.',
+      locateDenied: 'Location access was denied.', locateError: 'Could not fetch travel times.', locateBusy: 'Too many requests – please try again in a few minutes.', locateLimit: 'Travel times are unavailable for today, please try again tomorrow.',
       locateUnavailable: 'Your browser does not support geolocation.', locateNote: 'Driving time reflects real-time traffic.',
       modeDrive: 'By car (with traffic)', modeTransit: 'By public transport', modeBicycle: 'By bike', modeWalk: 'On foot',
       minutesShort: 'min'
@@ -599,7 +599,7 @@
         if (r.ok) return r.json();
         return r.json().catch(function () { return {}; }).then(function (j) {
           var e = new Error(String(r.status));
-          e.msgKey = { rate_limited: 'locateBusy', daily_limit: 'locateLimit', out_of_area: 'locateArea' }[j && j.error] || 'locateError';
+          e.msgKey = { rate_limited: 'locateBusy', daily_limit: 'locateLimit'}[j && j.error] || 'locateError';
           throw e;
         });
       })
